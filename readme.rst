@@ -41,6 +41,8 @@ Installation
 
 Please see the `installation section <https://codeigniter.com/user_guide/installation/index.html>`_
 of the CodeIgniter User Guide.
+Codeigniter 3
+Php 7.4.1
 
 *******
 License
