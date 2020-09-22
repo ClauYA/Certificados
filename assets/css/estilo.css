@@ -1,0 +1,67 @@
+
+.vista_certificado{
+	width: 100%;
+}
+.uno{
+	width: 10%;
+}
+.uno img{
+	margin-top: 20px;
+}
+.dos{
+	width: 80%;
+}
+.tres{
+	width: 10%;
+}
+.tres img{
+	margin-top: 25px;
+}
+.centrado{
+	text-align: center;
+}
+.izquierda{
+	text-align: left;
+}
+.cabecera {
+	font-family: Calibri, sans-serif;
+	margin-right: 20px;
+	margin-left: 20px;
+}
+.cuerpo {
+	margin-left: 70px;
+	margin-right: 70px;
+}
+body{
+	margin-top: 10px;
+	margin-left: 10px;
+	margin-right: 10px;
+	margin-bottom: 0px;
+	border: #1e2b37 0px groove;
+}
+.firmas{
+	margin: auto;
+	margin-top: 50px;
+	margin-bottom: 0px;
+	font-family: Calibri, sans-serif;
+}
+.firmas th{
+	padding-left: 10px;
+	padding-right: 10px;
+}
+.logos{
+	float: left;
+	margin-left: 5px;
+	position: absolute;
+	bottom: 5px;
+}
+.url{
+	float: right;
+	margin-right: 5px;
+	position: absolute;
+	bottom: -10px;
+}
+.logos th{
+	padding-right: 10px;
+}
+html { margin: 0px;}
