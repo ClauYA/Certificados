@@ -6,21 +6,14 @@ class vista_previa extends CI_Controller {
 	public function  __construct()
 	{
 		parent::__construct();
-		$this->load->helper(array('getmenu','url'));
 		$this->load->library('pdf');
+		$this->load->model('evento_model');
 	}
 	public function index()
 	{
-		//$data['menu'] = main_menu();
-		$result = $this->db->get('evento');
-		$data = array('consulta'=>$result);
-		$html= $this->load->view('vista_previa',[],true);
-		$this->pdf->createPDF($html, 'mypdf', false);
-	}
-	public function getevento()
-	{
-		$sql=$this->db->get('evento');
-		return $sql->result();
+		$parametro=$this->evento_model->getparametro();
+		$html= $this->load->view('vista_previa',array('parametro'=>$parametro),true);
+		$this->pdf->createPDF($html, 'pdf', false);
 	}
 
 }

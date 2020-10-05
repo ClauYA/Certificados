@@ -8,46 +8,93 @@ class evento extends CI_Controller {
 		parent::__construct();
 		$this->load->library('form_validation');
 		$this->load->helper('crear_evento_regla');
+		$this->load->library('upload');
+		$this->load->library('image_lib');
 		$this->load->helper('file');
 		$this->load->model('evento_model');
 	}
 	public function index()
 	{
-		$this->load->view('crear_evento','','TRUE');
-		//$this->getTemplate($vista);
+		//carga el formulario la cabecera y el nav
+		$this->load->view('includes/head');
+		$this->load->view('includes/navbar');
+		//$crear=$this->crear();
+		//$data = $this->evento_model->geteventos();
+		//$this->load->view('evento',array('crear'=>$crear,'data'=>$data),'TRUE');
+		$this->load->view('evento');
+		$this->load->view('includes/footer');
+
 	}
 
 	public function crear()
 	{
-		$nombre_e=$this->input->post('nombre_evento');
-		$unidad_o=$this->input->post('unidad_organizadora');
-		$fecha_i=$this->input->post('fecha_inicio');
-		$fecha_f=$this->input->post('fecha_final');
-		$mensaje_e=$this->input->post('mensaje_emision');
-		$imagen_f=$this->input->post('imagen_fondo');
-		$this->form_validation->set_rules(getcrearregla());
-		if ($this->form_validation->run() == FALSE)
+		//Configuracion para subir la imagen
+		$config['upload_path']="upload/fondos";
+		$config['allowed_types'] = "jpg|jpeg|png";
+		$config['max_size'] = "50000";
+		$config['max_width'] = "2000";
+		$config['max_height'] = "2000";
+
+		$this->upload->initialize($config);
+		if (!$this->upload->do_upload("fondo_certificado"))
 		{
-			$this->output->set_status_header(400);
-		}else{
-			//preparacion de ddatos para el envio a la bd
-			$evento = array(
-				'nombre_evento'=>$nombre_e,
-				'unidad_organizadora'=>$unidad_o,
-				'fecha_inicio'=>$fecha_i,
-				'fecha_final'=>$fecha_f,
-				'mensaje_emision'=>$mensaje_e,
-				'imagen_fondo'=>readfile($imagen_f)
-			);
-			if(!$this->evento_model->guardar($evento)){
-				$this->output->set_status_header(500);
-			}else{
-				//$data=$this->evento_model->guardar($evento);
-				redirect(base_url('tenor_certificado/crear'));
+			//ocurrio un error
+			//	$data['error'] = $this->upload->display_errors();
+			//	echo $this->upload->display_errors();
+		}else {
+			$file_info = $this->upload->data();
+
+			$this->crearvistaprevia($file_info['file_name']);
+
+			$nombre_e = $this->input->post('nombre_evento');
+			$unidad_o = $this->input->post('unidad_organizadora');
+			$fecha_i = $this->input->post('fecha_inicio');
+			$fecha_f = $this->input->post('fecha_final');
+			$mensaje_e = $this->input->post('mensaje_emision');
+			$imagen_f = $file_info['file_name'];
+
+			$this->form_validation->set_rules(getcrearregla());
+			if ($this->form_validation->run() == FALSE) {
+				$this->output->set_status_header(400);
+			} else {
+				//preparacion de ddatos para el envio a la bd
+				$evento = array(
+					'nombre_evento' => $nombre_e,
+					'unidad_organizadora' => $unidad_o,
+					'fecha_inicio' => $fecha_i,
+					'fecha_final' => $fecha_f,
+					'mensaje_emision' => $mensaje_e,
+					'imagen_fondo' => $imagen_f
+				);
+				if (!$this->evento_model->guardar($evento)) {
+					$this->output->set_status_header(500);
+				} else {
+
+					redirect(base_url('evento'));
+				}
 			}
 		}
-		$ev=$this->load->view('crear_evento','','TRUE');
-		$this->getTemplate($ev);
+		//$this->load->view('includes/head');
+		//$this->load->view('includes/navbar');
+		//$data = $this->evento_model->geteventos();
+		//$this->load->view('crear_evento',array('data'=>$data),'TRUE');
+		//$this->load->view('includes/footer');
+	}
+	function crearvistaprevia($filename)
+	{
+		$config['image_library'] = 'gd2';
+		$config['source_image'] = 'upload/fondos/'.$filename;
+		$config['create_thumb'] = TRUE;
+		$config['maintain_ratio']=TRUE;
+		$config['new_image']='upload/fondos/maxfondo/';
+		$config['thumb_marker']='';
+		$config['width']=300;
+		$config['height']=300;
+
+		$this->load->library('image_lib', $config);
+		$this->image_lib->initialize($config);
+		$this->image_lib->resize();
+		$this->image_lib->clear();
 	}
 	public function getTemplate($vista){
 		$data = array(
@@ -58,130 +105,12 @@ class evento extends CI_Controller {
 		);
 		$this->load->view('inicio',$data);
 	}
-
-	function guardar_archivo() {
-
-		$mi_imagen = 'fondo_certificado';
-		$config['upload_path']="upload/";
-		$config['allowed_types'] = "gif|jpg|jpeg|png";
-		$config['max_size'] = "50000";
-		$config['max_width'] = "2000";
-		$config['max_height'] = "2000";
-
-		$this->load->library('upload', $config);
-
-		if (!$this->upload->do_upload($mi_imagen)) {
-			//*** ocurrio un error
-			$data['uploadError'] = $this->upload->display_errors();
-			echo $this->upload->display_errors();
-			return;
-		}
-
-		$data['uploadSuccess'] = $this->upload->data();
+	public function obtener($id_evento=0)
+	{
+		$obtenerevento = $this->evento_model->getevento($id_evento);
+		$this->load->view('includes/head');
+		$this->load->view('includes/navbar');
+		$this->load->view('tenor',array('obtenerevento'=>$obtenerevento),'TRUE');
+		$this->load->view('includes/footer');
 	}
-	//public function validate()
-	//{
-	//	$nombre=$this->input->post('nombre_evento');
-	//	if(!$res = $this->evento_model->crear($nombre))
-	//	{
-
-	//	}
-	//	$data=array(
-	//		'id'=>$res->id_evento,
-	//		'nombre_evento'=>$res->nombre_evento,
-	//		'unidad_organizadora'=>$res->unidad_organizadora,
-	//		'fecha_inicio'=>$res->fecha_inicio,
-	//		'fecha_final'=>$res->fecha_final,
-	//		'mensaje_emision'=>$res->mensaje_emision,
-	//	);
-			//$this->session->set_userdata($data);
-			//echo json_encode(array("url"=>base_url('tenor_certificado')));
-	//	echo $res->nombre_evento;
-	//	var_dump($res->nombre_evento);
-
-	//}
-
-
-
-
-
-
-
-
-
-
-
-	//public function validacion(){
-	//	$this->form_validation->set_error_delimiters('','');
-	//	$valida=getcreaeventovalidacion();
-	//	$this->form_validation->set_rules($valida);
-	//	if ($this->form_validation->run() == FALSE) {
-	//			$data['menu'] = main_menu();
-	//			$this->load->view('crear_evento',$data);
-	//			$errores=array(
-	//				'nombre_evento'=>form_error('nombre_evento'),
-	//				'unidad_organizadora'=>form_error('unidad_organizadora'),
-	//				'fecha_inicio'=>form_error('fecha_inicio'),
-	//				'fecha_final'=>form_error('fecha_final'),
-	//				'mensaje_emision'=>form_error('mensaje_emision')
-	//			);
-	//			//echo json_encode($errores);
-	//			$this->output->set_status_header(400);
-	//	}else{
-	//		$nombre_evento=$this->input->post('nombre_evento');
-	//		$unidad_organizadora=$this->input->post('unidad_organizadora');
-	//		$fecha_inicio=$this->input->post('fecha_inicio');
-	//		$fecha_final=$this->input->post('fecha_final');
-	//		$mensaje_emision=$this->input->post('mensaje_emision');
-	//		if(!$res = $this->evento_model->crear($nombre_evento,$unidad_organizadora,$fecha_inicio,$fecha_final,$mensaje_emision)){
-	//			echo json_encode(array('mensaje'=>'Verificar credenciales'));
-	//			$this->output->set_status_header(401);
-	//			exit();
-	//		}
-	//		echo json_encode(array('mensaje'=>'Bienvenido'));
-	//	}
-	//}
-
-	//public function informacion()
-	//{
-	//	$nombre_evento = $this->input->post('nombre_evento');
-	//	$unidad_organizadora = $this->input->post('unidad_organizadora');
-	//	$fecha_inicio = $this->input->post('fecha_inicio');
-	//	$fecha_final = $this->input->post('fecha_final');
-	//	$mensaje_emision = $this->input->post('mensaje_emision');
-		//validacion del formulario crear evento
-		//$config = array(
-		//	array(
-		//		'field' => 'nombre_evento',
-		//		'label' => 'nombre de evento',
-		//		'rules' => 'required',
-		//		'errors' => array(
-		//			'required' => 'Debes ingresar %s',
-		//		),
-		//	),
-		//);
-		//$this->form_validation->set_rules($config);
-		//if ($this->form_validation->run() == FALSE) {
-		//	$data['menu'] = main_menu();
-		//	$this->load->view('crear_evento',$data);
-		//} else {
-
-			//var_dump($nombre_evento.$unidad_organizadora.$fecha_inicio.$fecha_final.$mensaje_emision);
-	//		$datos = array(
-	//			'nombre_evento' => $nombre_evento,
-	//			'unidad_organizadora' => $unidad_organizadora,
-	//			'fecha_inicio' => $fecha_inicio,
-	//			'fecha_final' => $fecha_final,
-	//			'mensaje_emision' => $mensaje_emision,
-	//		);
-	//		$data['menu'] = main_menu();
-	//		if (!$this->evento_model->crear($datos)) {
-	//			$data['mensaje'] = 'Ocurrio un error';
-	//			$this->load->view('crear_evento', $data);
-	//		}
-	//		$data['mensaje'] = 'registrado correctamente';
-	//		$this->load->view('crear_evento', $data);
-	//	}
-	//}
-
 }

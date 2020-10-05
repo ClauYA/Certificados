@@ -7,47 +7,88 @@ class firma extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->library('form_validation');
+		$this->load->library('upload');
+		$this->load->library( array('image_lib') );
 		$this->load->helper('firma_regla');
 		$this->load->helper('file');
 		$this->load->model('firma_model');
 	}
 	public function index()
 	{
-		$data = $this->firma_model->getfirmas();
-		$vista=$this->load->view('firma',array('data'=>$data),'TRUE');
-		$this->getTemplate($vista);
+		$this->load->view('includes/head');
+		$this->load->view('includes/nav');
+		$crearfirma=$this->crear();
+		//$obtener_firmas= $this->firma_model->getfirmas($id_evento);
+		$this->load->view('firma',array('crearfirma'=>$crearfirma) ,'','TRUE');
 	}
 
 	public function crear()
 	{
-		$nombre_c=$this->input->post('nombreCompleto');
-		$grado=$this->input->post('grado');
-		$cargo=$this->input->post('cargo');
-		$institucion=$this->input->post('institucion');
-		$imagen_firma=$this->input->post('imagen');
+		$config['upload_path']='upload/firmas';
+		$config['allowed_types'] = 'jpg|jpeg|png';
+		$config['max_size'] = '50000';
+		$config['max_width'] = '2000';
+		$config['max_height'] = '2000';
 
-		$this->form_validation->set_rules(getfirmaregla());
-		if ($this->form_validation->run() == FALSE)
+		$this->upload->initialize($config);
+		if (!$this->upload->do_upload("imagen_firma"))
 		{
-			$this->output->set_status_header(400);
-		}else{
-			//preparacion de ddatos para el envio a la bd
-			$firma = array(
-				'nombreCompleto'=>$nombre_c,
-				'grado'=>$grado,
-				'cargo'=>$cargo,
-				'institucion'=>$institucion,
-				'imagen'=>readfile($imagen_firma)
-			);
-			if(!$this->firma_model->guardar($firma)){
-				$this->output->set_status_header(500);
-			}else{
-				redirect(base_url('subir_logos'));
+			//echo $this->upload->display_errors();
+			//$data['error'] = $this->upload->display_errors();
+		}else {
+			$file_info = $this->upload->data();
+			//llama al metodo miniatura de la firma
+			$this->minfirma($file_info['file_name']);
+
+			$id_evento = $this->input->post('id_evento');
+			$nombre_c = $this->input->post('nombre_completo');
+			$grado = $this->input->post('grado');
+			$cargo = $this->input->post('cargo');
+			$institucion = $this->input->post('institucion');
+			$imagen_firma=$file_info['file_name'];
+
+			$this->form_validation->set_rules(getfirmaregla());
+			if ($this->form_validation->run() == FALSE) {
+				$this->output->set_status_header(400);
+			} else {
+				//preparacion de ddatos para el envio a la bd
+				$firma = array(
+					'nombre_completo' => $nombre_c,
+					'grado' => $grado,
+					'cargo' => $cargo,
+					'institucion' => $institucion,
+					'imagen'=>$imagen_firma,
+					'id_evento' =>$id_evento
+				);
+				$this->firma_model->guardar($firma);
+				redirect(base_url('evento/tenor/'.$id_evento));
 			}
 		}
-		$data = $this->firma_model->getfirmas();
-		$vista=$this->load->view('firma',array('data'=>$data),'TRUE');
-		$this->getTemplate($vista);
+	}
+	function minfirma($filename)
+	{
+		$config['image_library'] = 'gd2';
+		$config['source_image'] = 'upload/firmas'.$filename;
+		$config['create_thumb'] = TRUE;
+		$config['maintain_ratio']=TRUE;
+		$config['new_image']='upload/firmas/minfirmas/';
+		$config['thumb_marker']='';
+		$config['width']=200;
+		$config['height']=150;
+
+		$this->load->library('image_lib', $config);
+		$this->image_lib->initialize($config);
+		$this->image_lib->resize();
+		$this->image_lib->clear();
+	}
+	public function editar($id_firma=0)
+	{
+		$obtenerfirma = $this->firma_model->getfirm($id_firma);
+		echo '<pre>';
+		var_dump($obtenerfirma);
+		echo '</pre>';
+		$view=$this->load->view('editar_firma','',true);
+		$this->getTemplate($view);
 	}
 	public function getTemplate($vista){
 		$data = array(
@@ -56,39 +97,7 @@ class firma extends CI_Controller {
 			'content'=>$vista,
 			'footer'=>$this->load->view('includes/footer','',TRUE),
 		);
-		$this->load->view('inicio',$data);
+		$this->load->view('plantilla',$data);
 	}
-	public function editar($id_firma=0)
-	{
-		echo $id_firma;
-		$view=$this->load->view('editar_firma','',true);
-		$this->getTemplate($view);
-	}
-	function guardar_archivo() {
-
-		$mi_imagen = 'fondo_certificado';
-		$config['upload_path']="upload/";
-		$config['allowed_types'] = "gif|jpg|jpeg|png";
-		$config['max_size'] = "50000";
-		$config['max_width'] = "2000";
-		$config['max_height'] = "2000";
-
-		$this->load->library('upload', $config);
-
-		if (!$this->upload->do_upload($mi_imagen)) {
-			//*** ocurrio un error
-			$data['uploadError'] = $this->upload->display_errors();
-			echo $this->upload->display_errors();
-			return;
-		}
-
-		$data['uploadSuccess'] = $this->upload->data();
-	}
-
-	//public function recargar(){
-	//	$x=['firma' => $this->firma_model->obtener()];
-	//	$this->load->view('tabla_firma',$x);
-	//}
-
 
 }

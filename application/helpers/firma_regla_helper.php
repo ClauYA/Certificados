@@ -5,7 +5,7 @@ if (!function_exists('getfirmaregla'))
 	{
 		return array(
 			array(
-				'field' => 'nombreCompleto',
+				'field' => 'nombre_completo',
 				'label' => 'nombre completo',
 				'rules' => 'required|trim',
 				'errors' => array(
