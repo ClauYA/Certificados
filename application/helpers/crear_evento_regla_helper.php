@@ -44,6 +44,7 @@ if (!function_exists('getcrearregla'))
 					'required' => 'El campo %s es requerido',
 				),
 			),
+
 		);
 
 	}

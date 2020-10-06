@@ -9,6 +9,31 @@ class evento_model extends CI_Model{
 		$this->db->trans_start();
 		$this->db->insert('evento',$evento);
 		$id = $this->db->insert_id();
+		//echo $id;
+		//if($_FILES['imagen_fondo']['error']>0)
+		//{
+		//	echo "error al cargar";
+		//}else{
+		//	$permitidos = array('image/png','image/jpg');
+		//	$limite_kb = 500;
+		//	if (in_array($_FILES['imagen_fondo']['type'],$permitidos)&&$_FILES['imagen_fondo']['size']<=$limite_kb*1024){
+		//		$ruta = 'files/'.$id.'/';
+		//		$archivo = $ruta.$_FILES['imagen_fondo']['name'];
+		//		if (!file_exists($ruta)){
+		//			mkdir($ruta);
+		//		}
+		//		if (!file_exists($archivo)){
+		//			$resultado = @move_uploaded_file($_FILES['imagen_fondo']['tmp_name'],$archivo);
+		//			if ($resultado){
+		//				echo "Archivo guardado";
+		//			}else{
+		//				echo "Error al guardar";
+		//			}
+		//		}
+		//	}else{
+		//		echo "no permitido";
+		//	}
+		//}
 		$this->db->trans_complete();
 		return $id;
 		//$query = $this->db->query('SELECT LAST_INSERT_ID()');
@@ -17,37 +42,12 @@ class evento_model extends CI_Model{
 		//return $row['LAST_INSERT_ID()'];
 		//return !$this->db->trans_status()?false:true;
 	}
-	public function getparametro()
+	public function getevento($id)
 	{
-		$sql= $this->db->get('parametros');
-		return $sql->result();
-	}
-	public function geteventos()
-	{
-		$sql=$this->db->get('evento');
-		return $sql->result();
-	}
-	public function getevento($id_evento)
-	{
-		$sql= $this->db->get_where('evento', array('id_evento' => $id_evento), 1);
-		if(!$sql->result()){
-			return false;
-		}
-		return $sql->row();
-	}
-	public function geteve($id_firma)
-	{
-		//SELECT *
-		//FROM firma
-		//JOIN evento
-		//ON evento.id_evento = firma.id_evento
-		//WHERE firma.id_firma = $id_firma LIMIT 1
-		//1 parametro con que se relacionara
-		//2 parametro pide el on del join
-		//$this->db->select('*');
-		//$this->db->from('firma');
-		$this->db->join('evento','evento.id_evento = firma.id_evento');
-		$signature=$this->db->get_where('firma',array('firma.id_firma'=>$id_firma,1));
-		return $signature->row_array();
+		//$id = $this->db->insert_id();
+		$this->db->select('*');
+		$this->db->where('id_evento',$id);
+		$resultado=$this->db->get('evento');
+		return $resultado->result();
 	}
 }
