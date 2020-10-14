@@ -6,24 +6,31 @@ class firma_model extends CI_Model{
 	}
 	public function guardar($firma)
 	{
-		$this->db->trans_start();
 		$this->db->insert('firma',$firma);
-		//$this->db->insert_id();
-		$this->db->trans_complete();
-		return !$this->db->trans_status()?false:true;
 	}
+
 	public function getfirmas($id_evento)
 	{
 		$sql = $this->db->order_by('id_firma','asc')->get_where('firma', array('id_evento' => $id_evento));
 		return $sql->result();
 	}
-	public function getfirm($id_firma)
+
+	public function actualizarfirma($id_firma,$data)
 	{
-		//$id = $this->db->insert_id();
-		$this->db->select('*');
 		$this->db->where('id_firma',$id_firma);
-		$resultado=$this->db->get('firma');
-		return $resultado->row_array();
+		$this->db->update('firma',$data);
 	}
 
+	public function eliminarfirma($id_firma){
+		$this->db->where('id_firma',$id_firma);
+		$this->db->delete('firma');
+	}
+
+	public function getfirma($id_firma){
+		$sql= $this->db->get_where('firma', array('id_firma' => $id_firma), 1);
+		if(!$sql->result()){
+			return false;
+		}
+		return $sql->row();
+	}
 }

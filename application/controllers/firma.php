@@ -7,97 +7,112 @@ class firma extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->library('form_validation');
-		$this->load->library('upload');
 		$this->load->library( array('image_lib') );
 		$this->load->helper('firma_regla');
 		$this->load->helper('file');
 		$this->load->model('firma_model');
 	}
-	public function index()
-	{
-		$this->load->view('includes/head');
-		$this->load->view('includes/nav');
-		$crearfirma=$this->crear();
-		//$obtener_firmas= $this->firma_model->getfirmas($id_evento);
-		$this->load->view('firma',array('crearfirma'=>$crearfirma) ,'','TRUE');
-	}
+	public function crear(){
+		$id_evento = $this->input->post('id_evento');
+		$nombre_c = $this->input->post('nombre_completo');
+		$grado = $this->input->post('grado');
+		$cargo = $this->input->post('cargo');
+		$institucion = $this->input->post('institucion');
+		$imagen = $_FILES['imagen_firma']['name'];
 
-	public function crear()
-	{
-		$config['upload_path']='upload/firmas';
-		$config['allowed_types'] = 'jpg|jpeg|png';
-		$config['max_size'] = '50000';
-		$config['max_width'] = '2000';
-		$config['max_height'] = '2000';
-
-		$this->upload->initialize($config);
-		if (!$this->upload->do_upload("imagen_firma"))
-		{
-			//echo $this->upload->display_errors();
-			//$data['error'] = $this->upload->display_errors();
-		}else {
-			$file_info = $this->upload->data();
-			//llama al metodo miniatura de la firma
-			$this->minfirma($file_info['file_name']);
-
-			$id_evento = $this->input->post('id_evento');
-			$nombre_c = $this->input->post('nombre_completo');
-			$grado = $this->input->post('grado');
-			$cargo = $this->input->post('cargo');
-			$institucion = $this->input->post('institucion');
-			$imagen_firma=$file_info['file_name'];
-
-			$this->form_validation->set_rules(getfirmaregla());
-			if ($this->form_validation->run() == FALSE) {
-				$this->output->set_status_header(400);
-			} else {
-				//preparacion de ddatos para el envio a la bd
-				$firma = array(
-					'nombre_completo' => $nombre_c,
-					'grado' => $grado,
-					'cargo' => $cargo,
-					'institucion' => $institucion,
-					'imagen'=>$imagen_firma,
-					'id_evento' =>$id_evento
-				);
-				$this->firma_model->guardar($firma);
-				redirect(base_url('evento/tenor/'.$id_evento));
+		if($imagen) {
+			$imagen = $this->sub($id_evento);
+			if(isset($imagen['uploadError'])){
+				//var_dump($imagen);
+				redirect(base_url('evento/tenor/mensaje/'.'2'));
+			}else{
+				$imagen = 'upload/firmas/' . $id_evento . '/' . $imagen['raw_name'].$imagen['file_ext'];
 			}
 		}
-	}
-	function minfirma($filename)
-	{
-		$config['image_library'] = 'gd2';
-		$config['source_image'] = 'upload/firmas'.$filename;
-		$config['create_thumb'] = TRUE;
-		$config['maintain_ratio']=TRUE;
-		$config['new_image']='upload/firmas/minfirmas/';
-		$config['thumb_marker']='';
-		$config['width']=200;
-		$config['height']=150;
 
-		$this->load->library('image_lib', $config);
-		$this->image_lib->initialize($config);
-		$this->image_lib->resize();
-		$this->image_lib->clear();
-	}
-	public function editar($id_firma=0)
-	{
-		$obtenerfirma = $this->firma_model->getfirm($id_firma);
-		echo '<pre>';
-		var_dump($obtenerfirma);
-		echo '</pre>';
-		$view=$this->load->view('editar_firma','',true);
-		$this->getTemplate($view);
-	}
-	public function getTemplate($vista){
-		$data = array(
-			'head'=>$this->load->view('includes/head','',TRUE),
-			'nav'=>$this->load->view('includes/nav','',TRUE),
-			'content'=>$vista,
-			'footer'=>$this->load->view('includes/footer','',TRUE),
-		);
-		$this->load->view('plantilla',$data);
+		$this->form_validation->set_rules(getfirmaregla());
+		if($this->form_validation->run()==FALSE){
+			$this->output->set_status_header(400);
+		}else{
+			$firma = array(
+				'nombre_completo' => $nombre_c,
+				'grado' => $grado,
+				'cargo' => $cargo,
+				'institucion' => $institucion,
+				'imagen'=>$imagen,
+				'id_evento' =>$id_evento
+			);
+			$this->firma_model->guardar($firma);
+			redirect(base_url('evento/tenor/'.$id_evento));
+		}
 	}
 
+	public function sub($id_evento){
+		if (!file_exists('upload')) {
+			mkdir('upload', 0777, true);
+		}
+		if(!file_exists('upload/firmas')){
+			mkdir('upload/firmas', 0777, true);
+		}
+		if(!file_exists('upload/firmas/'.$id_evento)){
+			mkdir('upload/firmas/'.$id_evento, 0777, true);
+		}
+
+		$config['upload_path'] = 'upload/firmas/'.strval($id_evento);
+		$config['file_name'] = 'imagen';
+		$config['allowed_types'] = "png";
+		$config['max_size'] = "10000";
+		$config['max_width'] = "5000";
+		$config['max_height'] = "5000";
+
+		$this->load->library('upload', $config);
+		if (!$this->upload->do_upload("imagen_firma"))
+		{
+			//*** ocurrio un error
+			$data['uploadError'] = $this->upload->display_errors();
+			return $data;
+		}
+		$data['uploadSuccess'] = $this->upload->data();
+		return $data['uploadSuccess'];
+	}
+	public function update(){
+		$id_evento= $this->input->post('id_evento');
+		$id_firma= $this->input->post('id_firma');
+		$nombre_completo = $this->input->post('nombre_completo');
+		$grado = $this->input->post('grado');
+		$cargo = $this->input->post('cargo');
+		$institucion = $this->input->post('institucion');
+		$imagen = $_FILES['imagen_firma']['name'];
+
+		$this->form_validation->set_rules(getfirmaregla());
+		if($this->form_validation->run()==FALSE){
+			$this->output->set_status_header(400);
+		}else{
+			$firma = array(
+				'nombre_completo' => $nombre_completo,
+				'grado' => $grado,
+				'cargo' => $cargo,
+				'institucion' => $institucion,
+				'id_evento'=>$id_evento
+			);
+			if($imagen) {
+				$imagen = $this->sub($id_evento);
+				if(isset($imagen['uploadError'])){
+					redirect(base_url('evento/tenor/mensaje/'.'2'));
+				}else{
+					$imagen = 'upload/firmas/' . $id_evento . '/' . $imagen['raw_name'].$imagen['file_ext'];
+					$img['imagen']=$imagen;
+				}
+			}
+			$this->firma_model->actualizarfirma($id_firma,$firma);
+			redirect(base_url('evento/tenor/'.$id_evento));
+		}
+	}
+
+	public function delete(){
+		$id_firma = $this->input->post('id_firma');
+		$id_evento = $this->input->post('id_evento');
+		$this->firma_model->eliminarfirma($id_firma);
+		redirect(base_url('evento/tenor/'.$id_evento));
+	}
 }

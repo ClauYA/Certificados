@@ -3,11 +3,11 @@
 		<div class="text-center">
 			<h4 class="h4 text-gray-900 mb-4">Crear evento</h4>
 		</div>
-		<!--<form action="//base_url('evento/validate')" method="POST" id="form_crea_evento" >-->
 		<form action="" method="POST" id="form_crea_evento" enctype="multipart/form-data" >
 			<div class="form-group" id="nombre_evento">
 				<input type="text" class="form-control" name="nombre_evento" placeholder="Nombre de evento" value="<?=set_value('nombre_evento')?>">
-				<p><?php echo form_error('nombre_evento');?></p>
+				<?=form_error('nombre_evento','<p class="text-danger"></p>')?>
+
 			</div>
 			<div class="form-group izquierda" id="unidad_organizadora">
 				<input type="text" class="form-control" name="unidad_organizadora" placeholder="Unidad organizadora" value="<?=set_value('unidad_organizadora')?>">
@@ -56,8 +56,8 @@
 							<th scope="col">ELIMINAR</th>
 						</tr>
 					</thead>
+					<?php $contador=1; foreach ($data as $fila):?>
 					<tbody>
-						<?php $contador=1; foreach ($data as $fila):?>
 						<tr><td><?php echo($contador); $contador++?></td>
 							<td><?php echo $fila->nombre_evento?></td>
 							<td><?php echo $fila->unidad_organizadora?></td>
@@ -73,13 +73,42 @@
 									<i class="fa fa-folder-open"></i>
 								</a>
 							</td>
-							<td><a class="btn btn-danger"href="<?=base_url('evento/firma/'.$fila->id_evento)?>">
+							<td><button type="button" class="btn btn-danger" data-toggle="modal"  data-target="#modal_eliminar_evento<?=$fila->id_evento?>">
 									<i class="fa fa-trash"></i>
-								</a>
+								</button>
 							</td>
 						</tr>
-						<?php endforeach;?>
+						<!--modal eliminar firma-->
+						<div class="modal" id="modal_eliminar_evento<?=$fila->id_evento?>">
+							<div class="modal-dialog" role="document">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title">Eliminar evento </h5>
+										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										</button>
+									</div>
+									<div class="modal-body">
+										<p>
+											¿Esta seguro que desea eliminar el evento: <?=$fila->nombre_evento?>?.
+										</p>
+									</div>
+									<div class="modal-footer">
+										<div class="carousel-inner">
+											<div class="float-right">
+												<form action="<?= base_url('crear_evento/delete')?>" method="post">
+													<input type="hidden" value="<?=$fila->id_evento?>" name="id_evento">
+													<button type="submit" class="btn btn-danger">Eliminar</button>
+													<button class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+												</form>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
 					</tbody>
+					<?php endforeach;?>
 				</table>
 			</div>
 			<hr>

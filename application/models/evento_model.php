@@ -11,11 +11,6 @@ class evento_model extends CI_Model{
 		$id = $this->db->insert_id();
 		$this->db->trans_complete();
 		return $id;
-		//$query = $this->db->query('SELECT LAST_INSERT_ID()');
-		//$row = $query->row_array();
-		//$this->db->trans_complete();
-		//return $row['LAST_INSERT_ID()'];
-		//return !$this->db->trans_status()?false:true;
 	}
 	public function getparametro()
 	{
@@ -35,19 +30,9 @@ class evento_model extends CI_Model{
 		}
 		return $sql->row();
 	}
-	public function geteve($id_firma)
-	{
-		//SELECT *
-		//FROM firma
-		//JOIN evento
-		//ON evento.id_evento = firma.id_evento
-		//WHERE firma.id_firma = $id_firma LIMIT 1
-		//1 parametro con que se relacionara
-		//2 parametro pide el on del join
-		//$this->db->select('*');
-		//$this->db->from('firma');
-		$this->db->join('evento','evento.id_evento = firma.id_evento');
-		$signature=$this->db->get_where('firma',array('firma.id_firma'=>$id_firma,1));
-		return $signature->row_array();
+
+	public function deleteevento($id_evento){
+		$this->db->where('id_evento',$id_evento);
+		$this->db->delete('evento');
 	}
 }

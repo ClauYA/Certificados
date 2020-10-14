@@ -45,12 +45,12 @@ class crear_evento extends CI_Controller {
 		if (!$this->upload->do_upload("fondo_certificado"))
 		{
 			//*** ocurrio un error
-			//	$data['error'] = $this->upload->display_errors();
-			//	echo $this->upload->display_errors();
+			$data['uploadError'] = $this->upload->display_errors();
+			return $data;
 		}else {
 			$file_info = $this->upload->data();
 
-			$this->crearvistaprevia($file_info['file_name']);
+			$this->fondomax($file_info['file_name']);
 
 			$nombre_e = $this->input->post('nombre_evento');
 			$unidad_o = $this->input->post('unidad_organizadora');
@@ -81,7 +81,7 @@ class crear_evento extends CI_Controller {
 			}
 		}
 	}
-	function crearvistaprevia($filename)
+	function fondomax($filename)
 	{
 		$config['image_library'] = 'gd2';
 		$config['source_image'] = 'upload/fondos/'.$filename;
@@ -89,8 +89,8 @@ class crear_evento extends CI_Controller {
 		$config['maintain_ratio']=TRUE;
 		$config['new_image']='upload/fondos/maxfondo/';
 		$config['thumb_marker']='';
-		$config['width']=300;
-		$config['height']=300;
+		$config['width']=3000;
+		$config['height']=2000;
 
 		$this->load->library('image_lib', $config);
 		$this->image_lib->initialize($config);
@@ -98,4 +98,9 @@ class crear_evento extends CI_Controller {
 		$this->image_lib->clear();
 	}
 
+	public function delete(){
+		$id_evento = $this->input->post('id_evento');
+		$this->evento_model->deleteevento($id_evento);
+		redirect(base_url('crear_evento'));
+	}
 }

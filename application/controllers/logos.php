@@ -7,68 +7,97 @@ class logos extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->library('form_validation');
-		$this->load->library('upload');
 		$this->load->library( array('image_lib') );
 		$this->load->helper('logo_regla');
 		$this->load->helper('file');
 		$this->load->model('logo_model');
 	}
-	public function index()
-	{
-		//$data['menu'] = main_menu();
-		$this->load->view('subir_logos');
-	}
-	public function crear()
-	{
-		$config['upload_path']='upload/logos';
-		$config['allowed_types'] = 'jpg|jpeg|png';
-		$config['max_size'] = '50000';
-		$config['max_width'] = '2000';
-		$config['max_height'] = '2000';
+	public function crear(){
+		$id_evento=$this->input->post('id_evento');
+		$nombre = $this->input->post('nombre_logo');
+		$imagen = $_FILES['imagen_logo']['name'];
 
-		$this->upload->initialize($config);
-		if (!$this->upload->do_upload("imagen_logo"))
-		{
-			echo $this->upload->display_errors();
-			//$data['error'] = $this->upload->display_errors();
-		}else {
-			$file_info = $this->upload->data();
-			//llama al metodo miniatura de la firma
-			$this->minlogos($file_info['file_name']);
-
-			$id_evento=$this->input->post('id_evento');
-			$nombre = $this->input->post('nombre_logo');
-			$imagen_logo=$file_info['file_name'];
-
-			$this->form_validation->set_rules(getlogoregla());
-			if ($this->form_validation->run() == FALSE) {
-				$this->output->set_status_header(400);
-			} else {
-				//preparacion de ddatos para el envio a la bd
-				$logos = array(
-					'nombre' => $nombre,
-					'imagen'=>$imagen_logo,
-					'id_evento'=>$id_evento
-				);
-				$this->logo_model->guardar($logos);
-				redirect(base_url('evento/tenor/'.$id_evento));
+		if($imagen) {
+			$imagen = $this->sub($id_evento);
+			if(isset($imagen['uploadError'])){
+				redirect(base_url('evento/tenor/mensaje/'.'2'));
+			}else{
+				$imagen = 'upload/logos/' . $id_evento . '/' . $imagen['raw_name'].$imagen['file_ext'];
 			}
 		}
-	}
-	function minlogos($filename)
-	{
-		$config['image_library'] = 'gd2';
-		$config['source_image'] = 'upload/logos'.$filename;
-		$config['create_thumb'] = TRUE;
-		$config['maintain_ratio']=TRUE;
-		$config['new_image']='upload/logos/minlogos/';
-		$config['thumb_marker']='';
-		$config['width']=200;
-		$config['height']=150;
 
-		$this->load->library('image_lib', $config);
-		$this->image_lib->initialize($config);
-		$this->image_lib->resize();
-		$this->image_lib->clear();
+		$this->form_validation->set_rules(getlogoregla());
+		if($this->form_validation->run()==FALSE){
+			$this->output->set_status_header(400);
+		}else{
+			$logo = array(
+				'nombre' => $nombre,
+				'imagen'=>$imagen,
+				'id_evento' =>$id_evento
+			);
+			$this->logo_model->guardar($logo);
+			redirect(base_url('evento/tenor/'.$id_evento));
+		}
+	}
+
+	public function sub($id_evento){
+		if (!file_exists('upload')) {
+			mkdir('upload', 0777, true);
+		}
+		if(!file_exists('upload/logos')){
+			mkdir('upload/logos', 0777, true);
+		}
+		if(!file_exists('upload/logos/'.$id_evento)){
+			mkdir('upload/logos/'.$id_evento, 0777, true);
+		}
+		$config['upload_path'] = 'upload/logos/'.strval($id_evento);
+		$config['file_name'] = 'imagen';
+		$config['allowed_types'] = "png";
+		$config['max_size'] = "10000";
+		$config['max_width'] = "5000";
+		$config['max_height'] = "5000";
+
+		$this->load->library('upload', $config);
+		if (!$this->upload->do_upload("imagen_logo"))
+		{
+			//*** ocurrio un error
+			$data['uploadError'] = $this->upload->display_errors();
+			return $data;
+		}
+		$data['uploadSuccess'] = $this->upload->data();
+		return $data['uploadSuccess'];
+	}
+	public function update(){
+		$id_evento= $this->input->post('id_evento');
+		$id_imagen= $this->input->post('id_imagen');
+		$nombre = $this->input->post('nombre_logo');
+		$imagen = $_FILES['imagen_logo']['name'];
+
+		$this->form_validation->set_rules(getlogoregla());
+		if($this->form_validation->run()==FALSE){
+			$this->output->set_status_header(400);
+		}else{
+			$logo = array(
+				'nombre' => $nombre,
+				'id_evento'=>$id_evento
+			);
+			if($imagen) {
+				$imagen = $this->sub($id_evento);
+				if(isset($imagen['uploadError'])){
+					redirect(base_url('evento/tenor/mensaje/'.'2'));
+				}else{
+					$imagen = 'upload/logos/' . $id_evento . '/' . $imagen['raw_name'].$imagen['file_ext'];
+					$img['imagen']=$imagen;
+				}
+			}
+			$this->logo_model->actualizarlogo($id_imagen,$logo);
+			redirect(base_url('evento/tenor/'.$id_evento));
+		}
+	}
+	public function delete(){
+		$id_imagen = $this->input->post('id_imagen');
+		$id_evento = $this->input->post('id_evento');
+		$this->logo_model->eliminarlogo($id_imagen);
+		redirect(base_url('evento/tenor/'.$id_evento));
 	}
 }

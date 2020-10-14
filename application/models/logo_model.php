@@ -18,4 +18,14 @@ class logo_model extends CI_Model{
 		return $sql->result();
 	}
 
+	public function actualizarlogo($id_imagen,$data)
+	{
+		$this->db->where('id_imagen',$id_imagen);
+		$this->db->update('imagen',$data);
+	}
+	public function eliminarlogo($id_imagen){
+		$this->db->where('id_imagen',$id_imagen);
+		$this->db->delete('imagen');
+	}
+
 }
