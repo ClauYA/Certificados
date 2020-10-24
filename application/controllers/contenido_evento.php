@@ -11,6 +11,7 @@ class contenido_evento extends CI_Controller {
 		$this->load->model('tenor_model');
 		$this->load->model('firma_model');
 		$this->load->model('logo_model');
+		$this->load->model('participantes_model');
 	}
 	public function index($id_evento)
 	{
@@ -19,7 +20,8 @@ class contenido_evento extends CI_Controller {
 		$tenores= $this->tenor_model->gettenores($id_evento);
 		$firmas=$this->firma_model->getfirmas($id_evento);
 		$logos=$this->logo_model->getlogos($id_evento);
-		$contenido=$this->load->view('contenido_evento',array('evento'=>$obtener_evento,'tipo_certificado'=>$tipo_certificado,'tenores'=>$tenores,'firmas'=>$firmas,'logos'=>$logos),TRUE);
+		$participantes= $this->participantes_model->getparticipantes($id_evento);
+		$contenido=$this->load->view('contenido_evento',array('evento'=>$obtener_evento,'tipo_certificado'=>$tipo_certificado,'tenores'=>$tenores,'firmas'=>$firmas,'logos'=>$logos,'participantes'=>$participantes),TRUE);
 		$this->getTemplate($contenido, $obtener_evento);
 	}
 	public function getTemplate($vista){

@@ -50,7 +50,7 @@ class crear_evento extends CI_Controller {
 		}else {
 			$file_info = $this->upload->data();
 
-			$this->fondomax($file_info['file_name']);
+			//$this->fondomax($file_info['file_name']);
 
 			$nombre_e = $this->input->post('nombre_evento');
 			$unidad_o = $this->input->post('unidad_organizadora');

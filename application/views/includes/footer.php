@@ -1,4 +1,4 @@
-</div>
+
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="<?= base_url('assets/summernote/summernote-lite.js');?>"></script>
 <script>
@@ -33,9 +33,12 @@
 		]
 	});
 </script>
+
 <!-- jQuery Plugins -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="<?= base_url('assets/js/bootstrap.min.js');?>"></script>
 <script src="<?= base_url('assets/js/jquery.fancybox.min.js' );?>"></script>
+<script src="<?= base_url('assets/datarangepicker/datarangepicker.js' );?>"></script>
+<script src="<?= base_url('assets/datarangepicker/moment.min.js' );?>"></script>
 </body>
 </html>

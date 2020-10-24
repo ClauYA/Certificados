@@ -12,10 +12,5 @@ class vista_previa_model extends CI_Model{
 		$this->db->trans_complete();
 		return !$this->db->trans_status()?false:true;
 	}
-	public function getevento()
-	{
-		$sql=$this->db->get('evento');
-		return $sql->result();
-	}
 
 }

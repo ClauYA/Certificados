@@ -1,5 +1,5 @@
 <div class="row justify-content-center">
-	<div class="col-xl-10 col-lg-12 col-md-9">
+	<div class="col-lg-12 col-md-9">
 		<div class="text-center">
 			<h4 class="h4 text-gray-900 mb-4">Crear evento</h4>
 		</div>
@@ -14,11 +14,11 @@
 				<p><?php echo form_error('unidad_organizadora');?></p>
 			</div>
 			<div class="form-group izquierda" id="fecha_inicio">
-				<input type="date" class="form-control" name="fecha_inicio" placeholder="Fecha de inicio" value="<?=set_value('fecha_inicio')?>">
+				<input type="date" id="from" class="form-control" name="fecha_inicio" placeholder="Fecha de inicio" value="<?=set_value('fecha_inicio')?>">
 				<p><?php echo form_error('fecha_inicio');?></p>
 			</div>
 			<div class="form-group izquierda" id="fecha_final">
-				<input type="date" class="form-control" name="fecha_final" placeholder="Fecha final" value="<?=set_value('fecha_final')?>">
+				<input type="date" id="to" class="form-control" name="fecha_final" placeholder="Fecha final" value="<?=set_value('fecha_final')?>">
 				<p"><?php echo form_error('fecha_final');?></p>
 			</div>
 			<div class="form-group izquierda" id="mensaje_emision">
@@ -31,7 +31,7 @@
 				<p><?php echo form_error('fondo_certificado');?></p>
 			</div>
 			<!--option="?=set_value('nombre_evento')=='admin'?'selected':'';?> value="admin">-->
-			<div class="col-auto">
+			<div class="form-group">
 				<input type="submit" class="btn btn-success btn-user btn-block" value="Guardar">
 			</div>
 			<hr>
@@ -116,4 +116,14 @@
 	</div>
 </div>
 
+<input type="text" name="daterange" value="01/01/2018 - 01/15/2018" />
 
+<script>
+	$(function() {
+		$('input[name="daterange"]').daterangepicker({
+			opens: 'left'
+		}, function(start, end, label) {
+			console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+		});
+	});
+</script>

@@ -19,15 +19,15 @@
 			<button type="button" class="btn btn-info float-right" data-toggle="modal" data-target="#modal_crear_participantes">
 				<span class="icon icon-plus align-middle"> </span>  Agregar participantes
 			</button>
-			<a class="btn btn-info" href="<?=base_url('vista_previa')?>" role="button">Vista previa</a>
+
+			<a class="btn btn-info" href="<?=base_url('evento/pdf/'.$evento->id_evento)?>" role="button">Vista previa</a>
 		</div>
 		<hr><hr><hr>
 		<!--Lista de tenores-->
 		<div class="text-left">
 			<h3><strong>Tenores certificado</strong></h3>
 		</div>
-		<div class="table-responsive">
-			<table class="table">
+			<table class="table mt-3">
 				<thead class="thead-dark">
 					<tr><th scope="col" style="text-align: center">NRO</th>
 						<th scope="col" style="text-align: center">TIPO CERTIFICADO</th>
@@ -129,15 +129,13 @@
 					<?php endforeach; ?>
 					</tbody>
 			</table>
-		</div>
-
 		<hr>
 		<!--Lista de firmas-->
 		<div class="text-left">
 			<h3><strong>Pie de firma certificado</strong></h3>
 		</div>
 		<div class="table-responsive">
-			<table class="table">
+			<table class="table mt-3">
 				<thead class="thead-dark">
 				<tr>
 					<th scope="col" style="text-align: center">GRADO</th>
@@ -358,6 +356,45 @@
 		</div>
 	</div>
 </div>
+<!--Lista de participantes-->
+<div class="text-left">
+	<h3><strong>Lista participantes</strong></h3>
+</div>
+<div class="table-responsive">
+	<table class="table" align="center">
+		<thead class="thead-dark">
+		<tr>
+			<th scope="col" class="talign-center">NRO</th>
+			<th scope="col">NOMBRES</th>
+			<th scope="col">APELLIDO PATERNO</th>
+			<th scope="col">APELLIDO MATERNO</th>
+			<th scope="col">CI</th>
+			<th scope="col">EMAIL</th>
+			<th scope="col">CELULAR</th>
+			<th scope="col">GRADO</th>
+			<th scope="col">NOTA</th>
+			<th scope="col">TIPO CERTIFICADO</th>
+		</tr>
+		</thead>
+		<tbody>
+		<?php $contador = 1;
+		foreach ($participantes as $participante): ?>
+			<tr>
+				<td><?php echo($contador);$contador++ ?></td>
+				<td><?php echo $participante->nombres?></td>
+				<td><?php echo $participante->apellido_paterno?></td>
+				<td><?php echo $participante->apellido_materno?></td>
+				<td><?php echo $participante->ci?></td>
+				<td><?php echo $participante->email?></td>
+				<td><?php echo $participante->nro_celular?></td>
+				<td><?php echo $participante->grado?></td>
+				<td><?php echo $participante->nota?></td>
+				<td><?php echo $participante->descripcion?></td>
+			</tr>
+		<?php endforeach; ?>
+		</tbody>
+	</table>
+</div>
 <!--modal para crear el tenor-->
 <div class="modal" id="modal_crear_tenor">
 	<div class="modal-dialog modal-lg" role="document">
@@ -479,3 +516,37 @@
 	</div>
 </div>
 
+<!--modal para crear participantes-->
+<div class="modal" id="modal_crear_participantes">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Importar lista de participantes</h4>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<form action="<?php echo base_url('participantes/crear') ?>" method="POST" id="import_form" enctype="multipart/form-data">
+				<input type="hidden" value="<?= $evento->id_evento ?>" name="id_evento">
+				<div class="modal-body">
+					<div class="form-group">
+						<label for="imagen_participante">Descargar plantilla Excel</label>
+						<a href="<?php echo base_url('download/downloads')?>">Descargar</a>
+					</div>
+					<div class="form-group">
+						<label for="imagen_participante">Subir Archivo Excel</label>
+						<input type="file" class="form-control-file" id="file" name="file" required accept=".xls, .xlsx">
+					</div>
+				</div>
+				<div class="modal-footer">
+					<div class="carousel-inner">
+						<div class="float-right">
+							<button type="submit" class="btn btn-primary">Importar</button>
+							<button class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>

@@ -13,7 +13,10 @@
 	<!-- Bootstrap -->
 	<link type="text/css" rel="stylesheet" href="<?= base_url('assets/css/bootstrap.min.css');?>"/>
 	<link type="text/css" href="<?= base_url('assets/summernote/summernote-lite.css');?>" rel="stylesheet">
-</head>
+	<link rel="stylesheet"  href="<?= base_url('assets/datarangepicker/datarangepicker.css');?>" rel="stylesheet">
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <body>
 
 

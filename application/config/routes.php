@@ -57,4 +57,5 @@ $route['translate_uri_dashes'] = FALSE;
 $route['evento/tenor/(:num)']='contenido_evento/index/$1';
 $route['evento/tenor/mensaje/(:num)']='mensajes/index/$1';
 $route['evento/firma/(:num)']='firma/index/$1';
+$route['evento/pdf/(:num)']='vista_previa/index/$1';
 
